@@ -192,7 +192,7 @@
     map)
   "Keymap for bibslurp mode.")
 
-(define-derived-mode bibslurp-mode fundamental-mode "BibSlurp"
+(define-derived-mode bibslurp-ads-mode fundamental-mode "BibSlurp"
   "Major mode for perusing ADS search results and slurping bibtex
 entries to the kill-ring.  This is pretty specific, so you should
 only enter the mode via `bibslurp-query-ads'.
@@ -284,7 +284,7 @@ For each entry, the elements are:
  * 6: URL of the abstract
 All elements are string.")
 
-(defun bibslurp/search-results (search-url &optional search-string)
+(defun bibslurp/ads-search-results (search-url &optional search-string)
   "Create the buffer for the results of a search.
 
 Displays results in a new buffer called \"ADS Search Results\"
@@ -325,7 +325,7 @@ the mode at any time by hitting 'q'."
 			   bibslurp-entry-list) ""))
 	;; Shave off the last newlines
 	(delete-char -4))
-      (bibslurp-mode))
+      (bibslurp-ads-mode))
     (switch-to-buffer buf)
     (setq buffer-read-only t)
     (set-buffer-modified-p nil)
@@ -366,6 +366,42 @@ Press \"C-c C-c\" to turn to the advanced search interface."
       (quit (if (equal last-input-event ?\C-c)
 		(bibslurp-query-ads-advanced-search)
 	      (error "Quit"))))))
+;;;###autoload
+(defun bibslurp-query-arxiv (&optional search-string)
+  "Ask for a search string and sends the query to arXiv.
+
+Press \"C-c C-c\" to turn to the advanced search interface."
+  (interactive)
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map minibuffer-local-map)
+    ;; Bind C-c C-c to abort reading from minibuffer.  This throws a `quit'
+    ;; signal that we can catch later.
+    (define-key map "\C-c\C-c"
+      (lambda ()
+	(interactive)
+	(abort-recursive-edit)))
+    (condition-case nil
+	(progn
+	  ;; Read the search string from minibuffer, if not provided as
+	  ;; argument.
+	  (unless search-string
+	    (setq search-string
+		  (read-from-minibuffer "Search string: " nil map nil
+					'bibslurp-query-history)))
+	  ;; Show search results for the given search string.
+	  (window-configuration-to-register :bibslurp-window)
+	  (bibslurp/ads-search-results (bibslurp/build-arxiv-url search-string)
+				   search-string))
+      ;; We've received a `quit' signal.  If it has been thrown by C-c C-c,
+      ;; start the ADS advanced search, otherwise emit the standard error.
+      ;; XXX: actually `last-input-event' holds only the very last event (C-c,
+      ;; in this case), we must hope the user didn't bind other keys ending in
+      ;; C-c to a `quit' signal, but this isn't the case in the standard
+      ;; configuration.
+      (quit (if (equal last-input-event ?\C-c)
+		(bibslurp-query-ads-advanced-search)
+	      (error "Quit"))))))
+
 
 (defun bibslurp/read-table ()
   "Parse the HTML from a search results page.
