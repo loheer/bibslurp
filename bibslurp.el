@@ -120,7 +120,9 @@
 ;;  2. finish documentation
 ;;  3. clean up code
 ;;  4. rethink regexps
-
+;;
+;;
+;;  implement different modes
 
 ;;; Code:
 (require 's)
