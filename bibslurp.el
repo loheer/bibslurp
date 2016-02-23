@@ -221,6 +221,40 @@ configuration."
   (when (get-register :bibslurp-window)
     (jump-to-register :bibslurp-window)))
 
+(defun bibslurp/build-arxiv-url (search-string)
+  "Helper function which turns a search string (e.g. \"^Quataert
+2008\") into an ads search url.  Used by `bibslurp-query-ads'."
+  (let ((base-url
+         "http://arxiv.org/find/all/1/all:+")
+        (url-sep "+")
+        (url-end "&version=1"))
+    (concat base-url
+            (replace-regexp-in-string " " url-sep search-string)
+            url-end)))
+
+(defun bibslurp/build-zbmath-url (search-string)
+  "Helper function which turns a search string (e.g. \"^Quataert
+2008\") into an ads search url.  Used by `bibslurp-query-ads'."
+  (let ((base-url
+         "http://adsabs.harvard.edu/cgi-bin/nph-basic_connect?qsearch=")
+        (url-sep "+")
+        (url-end "&version=1"))
+    (concat base-url
+            (replace-regexp-in-string " " url-sep search-string)
+            url-end)))    
+
+
+(defun bibslurp/build-mathscinet-url (search-string)
+  "Helper function which turns a search string (e.g. \"^Quataert
+2008\") into an ads search url.  Used by `bibslurp-query-ads'."
+  (let ((base-url
+         "http://adsabs.harvard.edu/cgi-bin/nph-basic_connect?qsearch=")
+        (url-sep "+")
+        (url-end "&version=1"))
+    (concat base-url
+            (replace-regexp-in-string " " url-sep search-string)
+            url-end)))    
+
 (defun bibslurp/build-ads-url (search-string)
   "Helper function which turns a search string (e.g. \"^Quataert
 2008\") into an ads search url.  Used by `bibslurp-query-ads'."
